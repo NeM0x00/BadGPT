@@ -10,11 +10,14 @@ import (
 	"net"
 	"os"
 
-	"github.com/projectdiscovery/subfinder/v2/pkg/runner"
+	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/gologger/levels"
+	httpx "github.com/projectdiscovery/httpx/runner"
+	subfinder "github.com/projectdiscovery/subfinder/v2/pkg/runner"
 )
 
 func subenum() {
-	subfinderOpts := &runner.Options{
+	subfinderOpts := &subfinder.Options{
 		Threads:            10, // Thread controls the number of threads to use for active enumerations
 		Timeout:            30, // Timeout is the seconds to wait for sources to respond
 		MaxEnumerationTime: 10, // MaxEnumerationTime is the maximum amount of time in mins to wait for enumeration
@@ -27,7 +30,7 @@ func subenum() {
 	// disable timestamps in logs / configure logger
 	log.SetFlags(0)
 
-	subfinder, err := runner.NewRunner(subfinderOpts)
+	subfinder, err := subfinder.NewRunner(subfinderOpts)
 	if err != nil {
 		log.Fatalf("failed to create subfinder runner: %v", err)
 	}
@@ -43,7 +46,38 @@ func subenum() {
 	}
 	// print the output
 	log.Println(output.String())
+}
 
+func filtered() {
+	gologger.DefaultLogger.SetMaxLevel(levels.LevelVerbose) // increase the verbosity (optional)
+
+	options := httpx.Options{
+		Retries: 3,
+		Methods:            "GET",
+		InputFile:          "subfinder_output",
+		FollowRedirects:    true,
+		TechDetect:         true,
+		VHost:              true,
+		ProbeAllIPS:        true,
+		Output:             "httpx_file",
+		StatusCode:         true,
+		RandomAgent:        true,
+		ExtractTitle:       true,
+		OutputIP:           true,
+		OutputServerHeader: true,
+	}
+
+	if err := options.ValidateOptions(); err != nil {
+		log.Fatal(err)
+	}
+
+	httpxRunner, err := httpx.New(&options)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer httpxRunner.Close()
+
+	httpxRunner.RunEnumeration()
 }
 
 func sub_takeover() {
@@ -99,4 +133,5 @@ func sub_takeover() {
 func main() {
 	subenum()
 	sub_takeover()
+	filtered()
 }
