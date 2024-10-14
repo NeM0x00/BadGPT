@@ -3,11 +3,12 @@ module main.go
 go 1.23.2
 
 require (
-	github.com/projectdiscovery/goflags v0.1.64
 	github.com/projectdiscovery/gologger v1.1.27
 	github.com/projectdiscovery/httpx v1.6.8
 	github.com/projectdiscovery/subfinder/v2 v2.6.6
 )
+
+require github.com/projectdiscovery/goflags v0.1.64 // indirect
 
 require (
 	aead.dev/minisign v0.2.0 // indirect
@@ -42,7 +43,7 @@ require (
 	github.com/gaissmai/bart v0.9.5 // indirect
 	github.com/go-faker/faker/v4 v4.1.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/go-rod/rod v0.114.0 // indirect
+	github.com/go-rod/rod v0.114.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/certificate-transparency-go v1.1.4 // indirect

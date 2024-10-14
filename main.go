@@ -52,19 +52,21 @@ func filtered() {
 	gologger.DefaultLogger.SetMaxLevel(levels.LevelVerbose) // increase the verbosity (optional)
 
 	options := httpx.Options{
-		Retries: 3,
+		Retries:            3,
 		Methods:            "GET",
 		InputFile:          "subfinder_output",
 		FollowRedirects:    true,
 		TechDetect:         true,
 		VHost:              true,
-		ProbeAllIPS:        true,
 		Output:             "httpx_file",
 		StatusCode:         true,
 		RandomAgent:        true,
 		ExtractTitle:       true,
 		OutputIP:           true,
 		OutputServerHeader: true,
+		TLSGrab : true ,
+		
+		
 	}
 
 	if err := options.ValidateOptions(); err != nil {
