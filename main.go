@@ -4,11 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"net/http"
 	"os"
+	"regexp"
+	"sort"
+	"strings"
+	"time"
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/levels"
@@ -16,7 +22,8 @@ import (
 	subfinder "github.com/projectdiscovery/subfinder/v2/pkg/runner"
 )
 
-func subenum() {
+func subenum() error {
+	fmt.Println("##################### Subdomain Enumeration Starts : #####################")
 	subfinderOpts := &subfinder.Options{
 		Threads:            10, // Thread controls the number of threads to use for active enumerations
 		Timeout:            30, // Timeout is the seconds to wait for sources to respond
@@ -25,6 +32,7 @@ func subenum() {
 		ResolverList:       "all-resolvers",
 		OutputFile:         "subfinder_output",
 		All:                true,
+		Silent:             false,
 	}
 
 	// disable timestamps in logs / configure logger
@@ -46,9 +54,13 @@ func subenum() {
 	}
 	// print the output
 	log.Println(output.String())
+	fmt.Println("##################### Subdomain Enumeration Ends : #####################")
+	return nil
+
 }
 
-func filtered() {
+func filtered() error {
+	fmt.Println("##################### Filter Starts : #####################")
 	gologger.DefaultLogger.SetMaxLevel(levels.LevelVerbose) // increase the verbosity (optional)
 
 	options := httpx.Options{
@@ -64,9 +76,8 @@ func filtered() {
 		ExtractTitle:       true,
 		OutputIP:           true,
 		OutputServerHeader: true,
-		TLSGrab : true ,
-		
-		
+		TLSGrab:            true,
+		Silent:             false,
 	}
 
 	if err := options.ValidateOptions(); err != nil {
@@ -80,19 +91,95 @@ func filtered() {
 	defer httpxRunner.Close()
 
 	httpxRunner.RunEnumeration()
+	fmt.Println("##################### Filter Ends : #####################")
+	return nil
 }
 
-func sub_takeover() {
+func spliter() error {
+	// Define the input file
+	inputFile := "httpx_file"
+
+	// Define the output files for different status codes
+	statusCodes := map[string]string{
+		"200": "alive_subs",
+		"403": "forbidden",
+		"30":  "redirect_subs",
+		"404": "takeover_subs",
+		"50":  "server_errors",
+		"":    "all",
+	}
+
+	// Open the input file
+	file, err := os.Open(inputFile)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create or open the file that will hold all domains
+	allDomainsFile, err := os.Create("all_in_one")
+	if err != nil {
+		return fmt.Errorf("failed to create all_in_one file: %v", err)
+	}
+	defer allDomainsFile.Close()
+
+	// Prepare file writers for each status code output
+	outputFiles := make(map[string]*os.File)
+	for _, outputFile := range statusCodes {
+		outFile, err := os.Create(outputFile)
+		if err != nil {
+			return fmt.Errorf("failed to create output file: %v", err)
+		}
+		defer outFile.Close()
+		outputFiles[outputFile] = outFile
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	// Read each line from the input file
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Extract the domain (the first field) and write it to the all_in_one file
+		fields := strings.Fields(line)
+		if len(fields) > 0 {
+			_, err := allDomainsFile.WriteString(fields[0] + "\n")
+			if err != nil {
+				return fmt.Errorf("failed to write to all_in_one file: %v", err)
+			}
+		}
+
+		// Check each status code and write the matching line to its respective file
+		for code, outputFile := range statusCodes {
+			if strings.Contains(line, code) {
+				if len(fields) > 0 {
+					_, err := outputFiles[outputFile].WriteString(fields[0] + "\n")
+					if err != nil {
+						return fmt.Errorf("failed to write to file: %v", err)
+					}
+				}
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	return nil
+}
+
+func sub_takeover() error {
+	fmt.Println("##################### Subdomain Takeover Starts : #####################")
 	// ANSI color codes
 	green := "\033[32m"
 	red := "\033[31m"
 	reset := "\033[0m"
 
 	// Open the input file
-	file, err := os.Open("subfinder_output")
+	file, err := os.Open("takeover_subs")
 	if err != nil {
 		fmt.Println("Error opening input file:", err)
-		return
 	}
 	defer file.Close()
 
@@ -100,7 +187,6 @@ func sub_takeover() {
 	output_file, err := os.OpenFile("subdomain_Takeover", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error creating/opening output file:", err)
-		return
 	}
 	defer output_file.Close()
 
@@ -130,10 +216,138 @@ func sub_takeover() {
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading from input file:", err)
 	}
+	fmt.Println("##################### Subdomain Takeover Ends : #####################")
+	return nil
+}
+
+func extractUniqueIPs() error {
+	filename := "httpx_file"
+
+	// Define the IP address regular expression pattern
+	ipRegex := `\b([0-9]{1,3}\.){3}[0-9]{1,3}\b`
+	re := regexp.MustCompile(ipRegex)
+
+	// Open the input file
+	file, err := os.Open(filename)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create a map to store unique IP addresses
+	ipMap := make(map[string]bool)
+
+	// Read the file line by line
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Find all IP addresses in the line
+		ips := re.FindAllString(line, -1)
+		for _, ip := range ips {
+			ipMap[ip] = true // Store the IP in the map to ensure uniqueness
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	// Convert the map keys (IP addresses) to a slice
+	var uniqueIPs []string
+	for ip := range ipMap {
+		uniqueIPs = append(uniqueIPs, ip)
+	}
+
+	// Sort the IP addresses
+	sort.Strings(uniqueIPs)
+
+	// Create or open the output file
+	outputFile, err := os.Create("IPs.txt")
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %v", err)
+	}
+	defer outputFile.Close()
+
+	// Write the unique IP addresses to the output file
+	for _, ip := range uniqueIPs {
+		_, err := outputFile.WriteString(ip + "\n")
+		if err != nil {
+			return fmt.Errorf("failed to write to file: %v", err)
+		}
+	}
+
+	// Print the unique IP addresses to the console
+	for _, ip := range uniqueIPs {
+		fmt.Println(ip)
+	}
+
+	return nil
+}
+
+// Function to send notifications
+func notification(success bool, errorMsg string) {
+	const (
+		discordWebhookURL = "https://discord.com/api/webhooks/1295833677091307612/bIFlhaoQwRO4blcorMEoI2rIv0McRxdDpMGQ4tA44FMQsx0OdymwyLgc_N_GahvyUrTz"
+	)
+
+	var message string
+	if success {
+		message = "✅ Success: Task completed successfully."
+	} else {
+		message = fmt.Sprintf("❌ Error: %s", errorMsg)
+	}
+
+	payload := map[string]string{"content": message}
+	payloadBytes, _ := json.Marshal(payload)
+
+	// Function to post to webhook
+	postToWebhook := func(webhookURL string) error {
+		req, err := http.NewRequest("POST", webhookURL, bytes.NewBuffer(payloadBytes))
+		if err != nil {
+			return fmt.Errorf("failed to create request: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("failed to send request: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("non-ok HTTP status: %v", resp.StatusCode)
+		}
+
+		return nil
+	}
+
+	// Send notifications
+	if err := postToWebhook(discordWebhookURL); err != nil {
+		fmt.Println("Error sending to Discord:", err)
+	}
+}
+
+// Wrapper to execute functions and send notifications
+func executeWithNotification(task func() error) {
+	if err := task(); err != nil {
+		notification(false, err.Error()) // Notify with error
+	} else {
+		notification(true, "") // Notify success
+	}
 }
 
 func main() {
 	subenum()
-	sub_takeover()
 	filtered()
+	spliter()
+	extractUniqueIPs()
+	sub_takeover()
+	executeWithNotification(subenum)
+	executeWithNotification(filtered)
+	executeWithNotification(spliter)
+	executeWithNotification(sub_takeover)
+	executeWithNotification(extractUniqueIPs)
 }

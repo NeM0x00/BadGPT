@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/projectdiscovery/gologger v1.1.27
 	github.com/projectdiscovery/httpx v1.6.8
+	github.com/projectdiscovery/katana v1.1.0
 	github.com/projectdiscovery/subfinder/v2 v2.6.6
 )
 
@@ -12,6 +13,7 @@ require github.com/projectdiscovery/goflags v0.1.64 // indirect
 
 require (
 	aead.dev/minisign v0.2.0 // indirect
+	github.com/BishopFox/jsluice v0.0.0-20240110145140-0ddfab153e06 // indirect
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Mzack9999/gcache v0.0.0-20230410081825-519e28eab057 // indirect
@@ -36,6 +38,7 @@ require (
 	github.com/corona10/goimagehash v1.1.0 // indirect
 	github.com/corpix/uarand v0.2.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
+	github.com/ditashi/jsbeautifier-go v0.0.0-20141206144643-2520a8026a9c // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
@@ -66,6 +69,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
+	github.com/lukasbob/srcset v0.0.0-20190730101422-86b742e617f3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -110,12 +114,14 @@ require (
 	github.com/projectdiscovery/utils v0.2.13 // indirect
 	github.com/projectdiscovery/wappalyzergo v0.1.12 // indirect
 	github.com/refraction-networking/utls v1.6.7 // indirect
+	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/sashabaranov/go-openai v1.15.3 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.2 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
+	github.com/smacker/go-tree-sitter v0.0.0-20230720070738-0d0a9f78d8f8 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
@@ -161,5 +167,6 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
