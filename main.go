@@ -32,7 +32,7 @@ func subenum() error {
 		ResolverList:       "all-resolvers",
 		OutputFile:         "subfinder_output",
 		All:                true,
-		Silent:             false,
+		Silent:             true,
 	}
 
 	// disable timestamps in logs / configure logger
@@ -77,7 +77,7 @@ func filtered() error {
 		OutputIP:           true,
 		OutputServerHeader: true,
 		TLSGrab:            true,
-		Silent:             false,
+		Silent:             true,
 	}
 
 	if err := options.ValidateOptions(); err != nil {
@@ -106,7 +106,7 @@ func spliter() error {
 		"30":  "redirect_subs",
 		"404": "takeover_subs",
 		"50":  "server_errors",
-		"":    "all",
+		"":    "all_in_one",
 	}
 
 	// Open the input file
@@ -169,7 +169,7 @@ func spliter() error {
 	return nil
 }
 
-func sub_takeover() error {
+func sub_takeover()error {
 	fmt.Println("##################### Subdomain Takeover Starts : #####################")
 	// ANSI color codes
 	green := "\033[32m"
@@ -180,13 +180,26 @@ func sub_takeover() error {
 	file, err := os.Open("takeover_subs")
 	if err != nil {
 		fmt.Println("Error opening input file:", err)
+		
 	}
 	defer file.Close()
+
+	// Check if the input file is empty
+	stat, err := file.Stat()
+	if err != nil {
+		fmt.Println("Error getting input file info:", err)
+		
+	}
+	if stat.Size() == 0 {
+		fmt.Println("The input file 'takeover_subs' is empty.")
+		
+	}
 
 	// Open the output file (use O_APPEND to append to the file if it exists)
 	output_file, err := os.OpenFile("subdomain_Takeover", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error creating/opening output file:", err)
+		
 	}
 	defer output_file.Close()
 
@@ -195,14 +208,27 @@ func sub_takeover() error {
 
 	// Iterate over each line in the input file
 	for scanner.Scan() {
-		domain := scanner.Text()              // Read the domain
-		cname, err := net.LookupCNAME(domain) // Lookup CNAME for the domain
-		if err != nil {
-			// If there's an error, print in red and continue to the next domain
-			fmt.Printf("%sThe CNAME for %s is not found%s\n", red, domain, reset)
+		domain := scanner.Text() // Read the domain
+
+		// Check if the domain is empty
+		if domain == "" {
+			fmt.Println("Skipping empty line in the input file.")
 			continue
 		}
-		// If CNAME is found, print in green
+
+		// Remove "http://" or "https://" from the domain
+		domain = strings.TrimPrefix(domain, "http://")
+		domain = strings.TrimPrefix(domain, "https://")
+
+		// Perform CNAME lookup for the domain
+		cname, err := net.LookupCNAME(domain)
+		if err != nil {
+			// Print error with more detail in red and continue to the next domain
+			fmt.Printf("%sError looking up CNAME for %s: %s%s\n", red, domain, err.Error(), reset)
+			continue
+		}
+
+		// If CNAME is found, print it in green
 		fmt.Printf("%sThe CNAME for %s is %s%s\n", green, domain, cname, reset)
 
 		// Write the CNAME result to the output file
@@ -217,8 +243,9 @@ func sub_takeover() error {
 		fmt.Println("Error reading from input file:", err)
 	}
 	fmt.Println("##################### Subdomain Takeover Ends : #####################")
-	return nil
+	return nil 
 }
+
 
 func extractUniqueIPs() error {
 	filename := "httpx_file"
@@ -339,15 +366,16 @@ func executeWithNotification(task func() error) {
 	}
 }
 
+
 func main() {
-	subenum()
-	filtered()
-	spliter()
-	extractUniqueIPs()
-	sub_takeover()
-	executeWithNotification(subenum)
-	executeWithNotification(filtered)
-	executeWithNotification(spliter)
+	// subenum()
+	// filtered()
+	// spliter()
+	// extractUniqueIPs()
+	//sub_takeover()
+	// executeWithNotification(subenum)
+	// executeWithNotification(filtered)
+	// executeWithNotification(spliter)
+	// executeWithNotification(extractUniqueIPs)
 	executeWithNotification(sub_takeover)
-	executeWithNotification(extractUniqueIPs)
 }
