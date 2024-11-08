@@ -8,15 +8,37 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 	"net/http"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"time"
+	"net/url"
 
+
+	gau_output "github.com/lc/gau/v2/pkg/output"
+	gau_runner "github.com/lc/gau/v2/runner"
+	"github.com/lc/gau/v2/runner/flags"
+
+
+	"github.com/cyinnove/logify"
+	"github.com/projectdiscovery/katana/pkg/engine/standard"
+	"github.com/projectdiscovery/katana/pkg/output"
+	"github.com/projectdiscovery/katana/pkg/types"
+	"github.com/projectdiscovery/naabu/v2/pkg/runner"
+
+	//"github.com/containrrr/shoutrrr/shoutrrr/cmd/verify"
+	//	"github.com/cyinnove/logify"
+	_ "github.com/projectdiscovery/fdmax/autofdmax"
 	"github.com/projectdiscovery/gologger"
+
+	//"github.com/projectdiscovery/naabu/v2/pkg/runner"
+
+	//"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/levels"
 	httpx "github.com/projectdiscovery/httpx/runner"
 	subfinder "github.com/projectdiscovery/subfinder/v2/pkg/runner"
@@ -169,7 +191,7 @@ func spliter() error {
 	return nil
 }
 
-func sub_takeover()error {
+func sub_takeover() error {
 	fmt.Println("##################### Subdomain Takeover Starts : #####################")
 	// ANSI color codes
 	green := "\033[32m"
@@ -180,7 +202,7 @@ func sub_takeover()error {
 	file, err := os.Open("takeover_subs")
 	if err != nil {
 		fmt.Println("Error opening input file:", err)
-		
+
 	}
 	defer file.Close()
 
@@ -188,18 +210,18 @@ func sub_takeover()error {
 	stat, err := file.Stat()
 	if err != nil {
 		fmt.Println("Error getting input file info:", err)
-		
+
 	}
 	if stat.Size() == 0 {
 		fmt.Println("The input file 'takeover_subs' is empty.")
-		
+
 	}
 
 	// Open the output file (use O_APPEND to append to the file if it exists)
 	output_file, err := os.OpenFile("subdomain_Takeover", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error creating/opening output file:", err)
-		
+
 	}
 	defer output_file.Close()
 
@@ -243,9 +265,8 @@ func sub_takeover()error {
 		fmt.Println("Error reading from input file:", err)
 	}
 	fmt.Println("##################### Subdomain Takeover Ends : #####################")
-	return nil 
+	return nil
 }
-
 
 func extractUniqueIPs() error {
 	filename := "httpx_file"
@@ -315,7 +336,7 @@ func extractUniqueIPs() error {
 // Function to send notifications
 func notification(success bool, errorMsg string) {
 	const (
-		discordWebhookURL = "https://discord.com/api/webhooks/1295833677091307612/bIFlhaoQwRO4blcorMEoI2rIv0McRxdDpMGQ4tA44FMQsx0OdymwyLgc_N_GahvyUrTz"
+		discordWebhookURL = "https://discord.com/api/webhooks/1303587381340934265/AgNSPYOFOX2qDT5A6aW_ZDoH23ixx6iy_62rDdJpIcjH-hpnxih54FOv4eYi_VuNJWcx"
 	)
 
 	var message string
@@ -366,16 +387,415 @@ func executeWithNotification(task func() error) {
 	}
 }
 
+type KatanaOption func(*types.Options)
+
+// WithMaxDepth sets the maximum depth for crawling
+func WithMaxDepth(depth int) KatanaOption {
+	return func(o *types.Options) {
+		o.MaxDepth = depth
+	}
+}
+
+// WithConcurrency sets the number of concurrent crawling goroutines
+func WithConcurrency(concurrency int) KatanaOption {
+	return func(o *types.Options) {
+		o.Concurrency = concurrency
+	}
+}
+
+// WithTimeout sets the request timeout
+func WithTimeout(timeout int) KatanaOption {
+	return func(o *types.Options) {
+		o.Timeout = timeout
+	}
+}
+
+// ReadDomains reads domains from a file and returns them as a slice of strings
+func ReadDomains(filename string) ([]string, error) {
+	var domains []string
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			domains = append(domains, line)
+		}
+	}
+	return domains, scanner.Err()
+}
+
+// WriteURLsToFile writes the found URLs to a specified output file
+func WriteURLsToFile(filename string, urls []string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	for _, url := range urls {
+		_, err := writer.WriteString(fmt.Sprintf("%s\n", url))
+		if err != nil {
+			return err
+		}
+	}
+	return writer.Flush()
+}
+
+// RunKatana runs the Katana crawler concurrently on multiple targets
+func RunKatana(inputs []string, maxConcurrentCrawls int, opts ...KatanaOption) ([]string, error) {
+	// Default options
+	options := &types.Options{
+		MaxDepth:     30,
+		FieldScope:   "rdn",
+		BodyReadSize: math.MaxInt,
+		Timeout:      10,
+		Concurrency:  20,
+		Parallelism:  10,
+		Delay:        0,
+		RateLimit:    150,
+		Strategy:     "depth-first",
+		NoColors:     true,
+	}
+
+	// Apply optional configurations
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	// Prepare output collection and concurrency control
+	var urls []string
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, maxConcurrentCrawls) // Semaphore to limit concurrent crawls
+
+	// Callback to gather URLs
+	options.OnResult = func(result output.Result) {
+		mu.Lock()
+		defer mu.Unlock()
+		urls = append(urls, result.Request.URL)
+		logify.Infof("Found URL: %s", result.Request.URL) // Log each found URL
+	}
+
+	// Initialize crawler options (once)
+	crawlerOptions, err := types.NewCrawlerOptions(options)
+	if err != nil {
+		return nil, err
+	}
+	defer crawlerOptions.Close()
+
+	// Function to handle the crawling of a single target
+	crawlTarget := func(input string) {
+		defer wg.Done()
+		defer func() { <-sem }() // Release a semaphore slot when done
+
+		// Create and run the crawler
+		crawler, err := standard.New(crawlerOptions)
+		if err != nil {
+			logify.Errorf("Error creating crawler for %s: %v", input, err)
+			return
+		}
+		defer crawler.Close()
+
+		logify.Infof("Crawling: %s", input) // Log the target being crawled
+		err = crawler.Crawl(input)
+		if err != nil {
+			logify.Warningf("Failed to crawl %s: %v", input, err)
+		}
+	}
+
+	// Start crawling for each input concurrently
+	for _, input := range inputs {
+		wg.Add(1)
+		sem <- struct{}{} // Acquire a semaphore slot
+		go crawlTarget(input)
+	}
+
+	// Wait for all crawls to finish
+	wg.Wait()
+
+	return urls, nil // Return all found URLs
+}
+func portScan() error {
+
+	// Initialize options directly
+	options := &runner.Options{
+		Ports:             "22, 23, 25, 53, 80, 110, 135, 137, 139, 143, 443, 445, 465, 993, 995, 3306, 3389, 5900, 8080, 8443, 27017",
+		HostsFile:         "IPs.txt",
+		Output:            "Open_Ports",
+		Nmap:              true,
+		Ping:              true,
+		Verify:            true,
+		EnableProgressBar: true,
+		OutputCDN:         true,
+		ServiceDiscovery:  true,
+		Threads:           150,
+		Version:           true,
+		ServiceVersion:    true,
+	}
+
+	// Initialize the runner with options
+	naabuRunner, err := runner.NewRunner(options)
+	if err != nil {
+		gologger.Fatal().Msgf("Could not create runner: %s\n", err)
+	}
+	// Run the enumeration
+	err = naabuRunner.RunEnumeration(context.TODO())
+	if err != nil {
+		gologger.Fatal().Msgf("Could not run enumeration: %s\n", err)
+	}
+
+	// Cleanup resume file if the run was successful
+	options.ResumeCfg.CleanupResumeConfig()
+	fmt.Println("Scan completed successfully.")
+	return nil
+}
+
+
+func gau()error {
+	cfg, err := flags.New().ReadInConfig()
+	if err != nil {
+		log.Printf("error reading config: %v", err)
+	}
+
+	config, err := cfg.ProviderConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gau := new(gau_runner.Runner)
+
+	if err = gau.Init(config, cfg.Providers, cfg.Filters); err != nil {
+		log.Printf("error initializing runner: %v", err)
+	}
+
+	results := make(chan string)
+
+	// Set the output file to "gau_output"
+	out, err := os.OpenFile("gau_output", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		log.Fatalf("Could not open output file: %v\n", err)
+	}
+	defer out.Close()
+
+	var writeWg sync.WaitGroup
+	writeWg.Add(1)
+	go func(out io.Writer, JSON bool) {
+		defer writeWg.Done()
+		if JSON {
+			gau_output.WriteURLsJSON(out, results, config.Blacklist, config.RemoveParameters)
+		} else if err = gau_output.WriteURLs(out, results, config.Blacklist, config.RemoveParameters); err != nil {
+			log.Fatalf("error writing results: %v\n", err)
+		}
+	}(out, config.JSON)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	workChan := make(chan gau_runner.Work)
+	gau.Start(ctx, workChan, results)
+
+	// Open the input file "all_in_one" for reading
+	inputFile, err := os.Open("domains")
+	if err != nil {
+		log.Fatalf("Could not open input file: %v\n", err)
+	}
+	defer inputFile.Close()
+
+	sc := bufio.NewScanner(inputFile)
+	for sc.Scan() {
+		domain := sc.Text()
+		for _, provider := range gau.Providers {
+			workChan <- gau_runner.NewWork(domain, provider)
+		}
+	}
+	if err := sc.Err(); err != nil {
+		log.Fatal(err)
+	}
+	close(workChan)
+
+	// Wait for providers to fetch URLs
+	gau.Wait()
+
+	// Close results channel
+	close(results)
+
+	// Wait for writer to finish output
+	writeWg.Wait()
+
+	return nil ;
+}
+func url_filteration(katanaFile, gauFile string)error {
+// ProcessURLs takes the two input files, processes URLs, and performs the following tasks:
+// 1. Merges the URLs from both files into one list.
+// 2. Filters out duplicate URLs.
+// 3. Extracts URLs with parameters and writes them to "injection_test".
+// 4. Extracts JavaScript URLs and writes them to "js".
+
+	// Reading URLs from the files
+	urls, err := readURLsFromFile(katanaFile)
+	if err != nil {
+		return err
+	}
+	
+	// Read URLs from the gau_output file and append
+	gauURLs, err := readURLsFromFile(gauFile)
+	if err != nil {
+		return err
+	}
+	urls = append(urls, gauURLs...)
+
+	// Filter duplicates and categorize URLs
+	uniqueURLs := make(map[string]struct{})
+	var injectionURLs, jsURLs []string
+	var wg sync.WaitGroup
+
+	// Use goroutines for concurrent processing
+	for _, rawURL := range urls {
+		wg.Add(1)
+		go func(rawURL string) {
+			defer wg.Done()
+			// Validate and parse the URL
+			parsedURL, err := url.Parse(rawURL)
+			if err != nil {
+				return
+			}
+
+			// Normalize the URL (lowercase host and remove fragments)
+			parsedURL.Host = strings.ToLower(parsedURL.Host)
+			parsedURL.Fragment = ""
+
+			// Remove query parameters for deduplication
+			cleanURL := parsedURL.String()
+			if _, exists := uniqueURLs[cleanURL]; !exists {
+				uniqueURLs[cleanURL] = struct{}{}
+				
+				// Check if the URL has query parameters
+				if len(parsedURL.Query()) > 0 {
+					injectionURLs = append(injectionURLs, cleanURL)
+				}
+				
+				// Check if the URL points to a JS file
+				if strings.HasSuffix(parsedURL.Path, ".js") {
+					jsURLs = append(jsURLs, cleanURL)
+				}
+			}
+		}(rawURL)
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Write the results to the respective files
+	if err := writeURLsToFile("injection_test", injectionURLs); err != nil {
+		return err
+	}
+
+	if err := writeURLsToFile("js", jsURLs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// readURLsFromFile reads URLs from the given file and returns them as a slice.
+func readURLsFromFile(fileName string) ([]string, error) {
+	var urls []string
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("could not open file %s: %v", fileName, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		urls = append(urls, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading file %s: %v", fileName, err)
+	}
+
+	return urls, nil
+}
+
+// writeURLsToFile writes the given URLs to the specified output file.
+func writeURLsToFile(fileName string, urls []string) error {
+	file, err := os.Create(fileName)
+	if err != nil {
+		return fmt.Errorf("could not create file %s: %v", fileName, err)
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	for _, url := range urls {
+		_, err := writer.WriteString(url + "\n")
+		if err != nil {
+			return fmt.Errorf("error writing to file %s: %v", fileName, err)
+		}
+	}
+
+	return writer.Flush()
+}
+
+
+
 
 func main() {
-	// subenum()
-	// filtered()
-	// spliter()
-	// extractUniqueIPs()
-	//sub_takeover()
-	// executeWithNotification(subenum)
-	// executeWithNotification(filtered)
-	// executeWithNotification(spliter)
-	// executeWithNotification(extractUniqueIPs)
+
+	// 	// subenum()
+	// 	// filtered()
+	// 	// spliter()
+	// 	// extractUniqueIPs()
+	// 	// sub_takeover()
+	executeWithNotification(subenum)
+	executeWithNotification(filtered)
+	executeWithNotification(spliter)
+	executeWithNotification(extractUniqueIPs)
 	executeWithNotification(sub_takeover)
+	executeWithNotification(portScan)
+	executeWithNotification(gau)
+	
+	
+
+	// Call the ProcessURLs function with the appropriate input files
+	
+// Read domains from the alive_domains file
+	inputFile := "all_in_one"
+	domains, err := ReadDomains(inputFile)
+	if err != nil {
+		logify.Fatalf("Error reading domains: %v", err)
+	}
+	// Log the number of domains read
+	logify.Infof("Read %d domains from %s.", len(domains), inputFile)
+
+	// Run the Katana crawler with a maximum of 2 concurrent crawls
+	urls, err := RunKatana(domains, 2,
+		WithMaxDepth(3),
+		WithConcurrency(20),
+		WithTimeout(15),
+	)
+	if err != nil {
+		logify.Fatalf("Error: %v", err)
+	}
+
+	// Write the found URLs to the urls_katana file
+	outputFile := "urls_katana"
+	err = WriteURLsToFile(outputFile, urls)
+	if err != nil {
+		logify.Fatalf("Error writing URLs to file: %v", err)
+	}
+
+	logify.Infof("Crawled %d URLs. Results saved to %s.", len(urls), outputFile)
+
+	err = url_filteration("urls_katana", "gau_output")
+	if err != nil {
+		fmt.Printf("Error processing URLs: %v\n", err)
+	} else {
+		fmt.Println("URLs processed successfully.")
+	}
 }
