@@ -21,11 +21,11 @@ import (
 	"time"
 
 	getJs "github.com/003random/getJS/v2/runner"
-	"github.com/PuerkitoBio/goquery"
+	//"github.com/PuerkitoBio/goquery"
 	gau_output "github.com/lc/gau/v2/pkg/output"
 	gau_runner "github.com/lc/gau/v2/runner"
 	"github.com/lc/gau/v2/runner/flags"
-	"github.com/likexian/whois"
+	//"github.com/likexian/whois"
 
 	"github.com/cyinnove/logify"
 	"github.com/projectdiscovery/katana/pkg/engine/standard"

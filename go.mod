@@ -3,6 +3,7 @@ module main.go
 go 1.23.2
 
 require (
+	github.com/003random/getJS/v2 v2.0.0
 	github.com/cyinnove/logify v1.0.4
 	github.com/lc/gau/v2 v2.2.4
 	github.com/projectdiscovery/fdmax v0.0.4
@@ -11,7 +12,6 @@ require (
 	github.com/projectdiscovery/katana v1.1.1
 	github.com/projectdiscovery/naabu/v2 v2.3.2
 	github.com/projectdiscovery/subfinder/v2 v2.6.7
-	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
@@ -136,6 +136,7 @@ require (
 	github.com/sashabaranov/go-openai v1.15.3 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.2 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/smacker/go-tree-sitter v0.0.0-20230720070738-0d0a9f78d8f8 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
