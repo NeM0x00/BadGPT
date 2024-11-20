@@ -21,11 +21,9 @@ import (
 	"time"
 
 	getJs "github.com/003random/getJS/v2/runner"
-	//"github.com/PuerkitoBio/goquery"
 	gau_output "github.com/lc/gau/v2/pkg/output"
 	gau_runner "github.com/lc/gau/v2/runner"
 	"github.com/lc/gau/v2/runner/flags"
-	//"github.com/likexian/whois"
 
 	"github.com/cyinnove/logify"
 	"github.com/projectdiscovery/katana/pkg/engine/standard"
@@ -953,36 +951,11 @@ func updateTools() {
 }
 
 func main() {
-	// domainsFile := "domains" // File containing list of domains
-	// outputFile := "output_ips.txt" // File to store results
-
-	// output, err := os.Create(outputFile)
-	// if err != nil {
-	// 	fmt.Printf("Error creating output file: %v\n", err)
-	// 	return
-	// }
-	// defer output.Close()
-
-	// if err := processDomainsFile(domainsFile, output); err != nil {
-	// 	fmt.Printf("Error: %v\n", err)
-	// }
-	// Uncomment the following lines to run the functions with notifications
 	executeWithNotification(subenum)
 	executeWithNotification(filtered)
 	executeWithNotification(spliter)
 	executeWithNotification(extractUniqueIPs)
 	executeWithNotification(sub_takeover)
-		// // File paths for the input and output files
-		// file1 := "IPs.txt"
-		// file2 := "output_ips.txt"
-		// outputFile = "ips.txt"
-	
-		// // Call the function to merge the files
-		// if err := mergeFilesInOneFunction(file1, file2, outputFile); err != nil {
-		// 	fmt.Printf("Error: %v\n", err)
-		// } else {
-		// 	fmt.Println("Files merged successfully into", outputFile)
-		// }
 	executeWithNotification(portScan)
 	executeWithNotification(gau)
 
