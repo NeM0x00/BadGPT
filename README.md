@@ -12,3 +12,19 @@ Nuclei --- pending
 "All-resolver" file
 "Domains" file 
 ```
+# To-Do List
+
+## 🚀 Features to Implement
+- [ ] Implement reusme function
+- [ ] Add Logo in the entry 
+
+## 🐞 Bugs to Fix
+- [ ] Track your Process and enable debugging 
+- [ ] 
+
+## 🛠️ Improvements
+- [ ] Optimize database querie
+- [ ] Work on result (Json&PDF)
+- [ ] Add unit tests for API endpoints
+- [ ] Reporting
+- [ ] Scanner
