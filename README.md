@@ -16,11 +16,11 @@ Nuclei --- pending
 
 ## 🚀 Features to Implement
 - [ ] Implement reusme function
-- [ ] Add Logo in the entry 
+- [ ] Add Logo in the entry
+- [ ] Use Templates for exposure
 
 ## 🐞 Bugs to Fix
 - [ ] Track your Process and enable debugging 
-- [ ] 
 
 ## 🛠️ Improvements
 - [ ] Optimize database querie
