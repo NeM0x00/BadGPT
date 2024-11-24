@@ -28,3 +28,5 @@ Nuclei --- pending
 - [ ] Add unit tests for API endpoints
 - [ ] Reporting
 - [ ] Scanner
+- [ ] 403 Bypass
+- [ ] Fuzzing (subdomains-endpoints)
