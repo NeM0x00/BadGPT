@@ -12,7 +12,6 @@ BadGPT is a powerful and versatile framework designed to streamline the bug boun
 
 ---
 ```
-                                                 dddddddd                                                               
 BBBBBBBBBBBBBBBBB                                d::::::d       GGGGGGGGGGGGGPPPPPPPPPPPPPPPPP   TTTTTTTTTTTTTTTTTTTTTTT
 B::::::::::::::::B                               d::::::d    GGG::::::::::::GP::::::::::::::::P  T:::::::::::::::::::::T
 B::::::BBBBBB:::::B                              d::::::d  GG:::::::::::::::GP::::::PPPPPP:::::P T:::::::::::::::::::::T
@@ -29,6 +28,9 @@ BB:::::BBBBBB::::::Ba::::a    a:::::ad::::::ddddd::::::dd G:::::GGGGGGGG::::GPP:
 B:::::::::::::::::B a:::::aaaa::::::a d:::::::::::::::::d  GG:::::::::::::::GP::::::::P                T:::::::::T      
 B::::::::::::::::B   a::::::::::aa:::a d:::::::::ddd::::d    GGG::::::GGG:::GP::::::::P                T:::::::::T      
 BBBBBBBBBBBBBBBBB     aaaaaaaaaa  aaaa  ddddddddd   ddddd       GGGGGG   GGGGPPPPPPPPPP                TTTTTTTTTTT 
+
+
+                                                                                     By Youssef Elsheikh
 ```
 ## 📦 Requirements  
 
