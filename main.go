@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"runtime"
 
 	getJs "github.com/003random/getJS/v2/runner"
 	gau_output "github.com/lc/gau/v2/pkg/output"
@@ -62,6 +63,66 @@ BBBBBBBBBBBBBBBBB     aaaaaaaaaa  aaaa  ddddddddd   ddddd       GGGGGG   GGGGPPP
 	fmt.Println(asciiArt)
 	return nil 
 }
+
+
+func checkAndInstallLibpcap() {
+	// Check if libpcap is installed
+	fmt.Println("Checking for libpcap...")
+
+	if runtime.GOOS == "linux" {
+		_, err := exec.LookPath("apt-get") // Check for apt (Debian/Ubuntu)
+		if err == nil {
+			fmt.Println("Installing libpcap-dev...")
+			install := exec.Command("sudo", "apt-get", "install", "-y", "libpcap-dev")
+			install.Stdout = os.Stdout // Correctly assign to os.Stdout
+			install.Stderr = os.Stderr // Correctly assign to os.Stderr
+			err := install.Run()
+			if err != nil {
+				fmt.Printf("Failed to install libpcap-dev: %v\n", err)
+			} else {
+				fmt.Println("libpcap-dev installed successfully.")
+			}
+			return
+		}
+
+		_, err = exec.LookPath("yum") // Check for yum (CentOS/RHEL)
+		if err == nil {
+			fmt.Println("Installing libpcap-devel...")
+			install := exec.Command("sudo", "yum", "install", "-y", "libpcap-devel")
+			install.Stdout = os.Stdout // Correctly assign to os.Stdout
+			install.Stderr = os.Stderr // Correctly assign to os.Stderr
+			err := install.Run()
+			if err != nil {
+				fmt.Printf("Failed to install libpcap-devel: %v\n", err)
+			} else {
+				fmt.Println("libpcap-devel installed successfully.")
+			}
+			return
+		}
+	}
+
+	if runtime.GOOS == "darwin" {
+		// macOS
+		fmt.Println("Checking for libpcap on macOS...")
+		_, err := exec.LookPath("brew")
+		if err == nil {
+			fmt.Println("Installing libpcap...")
+			install := exec.Command("brew", "install", "libpcap")
+			install.Stdout = os.Stdout // Correctly assign to os.Stdout
+			install.Stderr = os.Stderr // Correctly assign to os.Stderr
+			err := install.Run()
+			if err != nil {
+				fmt.Printf("Failed to install libpcap: %v\n", err)
+			} else {
+				fmt.Println("libpcap installed successfully.")
+			}
+			return
+		}
+	}
+
+	fmt.Println("Manual installation of libpcap is required for your operating system.")
+}
+
 
 func subenum() error {
 	fmt.Println("##################### Subdomain Enumeration Starts : #####################")
@@ -978,6 +1039,11 @@ func updateTools() {
 
 func main() {
 
+		// Check for libpcap and install if necessary
+	checkAndInstallLibpcap()
+
+	// Start the framework
+	fmt.Println("Starting BadGPT...")
 	executeWithNotification(Logo)
 	executeWithNotification(subenum)
 	executeWithNotification(filtered)
@@ -1026,9 +1092,9 @@ func main() {
 	// Process JavaScript sources from "all-in-one" and write to "Js"
 	executeWithNotification(Js_Extractor)
 
-	// Check and install tools
-	// checkAndInstallTools()
+//	Check and install tools
+	checkAndInstallTools()
 
-	// // Update tools
-	// updateTools()
+	// Update tools
+	updateTools()
 }
