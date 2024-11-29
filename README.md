@@ -1,14 +1,30 @@
 # BadGPT  
 
-BadGPT is a powerful and versatile framework designed to streamline the bug bounty process. It offers tools for reconnaissance, scanning, searching, and exploitation across various targets such as domains, IPs, JavaScript files, CVEs, secrets, URLs, parameters, endpoints, credentials, and more. **BadGPT** is your all-in-one solution for starting bug bounty hunting with ease.  
+**BadGPT** is a robust framework designed to simplify and optimize the bug bounty process. Equipped with a suite of tools for reconnaissance, scanning, and exploitation, BadGPT helps researchers efficiently identify and exploit vulnerabilities. Whether you're hunting subdomains, analyzing JavaScript files, detecting secrets, or testing endpoints, **BadGPT** serves as your all-in-one solution for streamlined penetration testing.
 
 ---
 
 ## ✨ Features  
-- **Reconnaissance:** Subdomain discovery, endpoint enumeration, and domain analysis.  
-- **Scanning:** IP scanning, port enumeration, and vulnerability detection.  
-- **Search & Exploit:** Extract sensitive data like secrets, credentials, and CVEs.  
-- **Output Management:** Categorized outputs for targeted analysis.  
+
+### 1. Reconnaissance
+- Subdomain enumeration with **Subfinder**.
+- Endpoint discovery using **gau** (Get All URLs) and **Katana**.
+- Comprehensive JavaScript file analysis via **getJS**.
+
+### 2. Scanning
+- IP and port scanning with **Naabu**.
+- HTTP endpoint testing and interaction with **httpx**.
+
+### 3. Data Extraction
+- Detect secrets, credentials, and CVEs from the collected data.
+- Extract URLs and endpoints efficiently for further testing.
+
+### 4. Output Management
+- Categorized outputs (JSON/Text) for targeted analysis.
+- Detailed logging with **logify** and **gologger**.
+
+### 5. Notifications
+- **Discord notifications** to track scanning and exploitation progress in real-time.
 
 ---
 
@@ -88,6 +104,8 @@ go build -o output_folder/badgpt
 - [ ] Work on result (Json&PDF)
 - [ ] Add unit tests for API endpoints
 
+💡 Contribution
+We welcome contributions! Feel free to fork the repository, submit a pull request, or report issues.
 
 <h3 align="left">Support:</h3>  
 <p><a href="https://www.buymeacoffee.com/nemoxoo"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="Micro0x00" /></a></p><br><br>  
