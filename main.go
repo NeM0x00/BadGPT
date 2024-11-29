@@ -38,7 +38,32 @@ import (
 	"github.com/projectdiscovery/gologger/levels"
 	httpx "github.com/projectdiscovery/httpx/runner"
 	subfinder "github.com/projectdiscovery/subfinder/v2/pkg/runner"
+
 )
+func Logo() error {
+	asciiArt := `
+                                                 dddddddd                                                               
+BBBBBBBBBBBBBBBBB                                d::::::d       GGGGGGGGGGGGGPPPPPPPPPPPPPPPPP   TTTTTTTTTTTTTTTTTTTTTTT
+B::::::::::::::::B                               d::::::d    GGG::::::::::::GP::::::::::::::::P  T:::::::::::::::::::::T
+B::::::BBBBBB:::::B                              d::::::d  GG:::::::::::::::GP::::::PPPPPP:::::P T:::::::::::::::::::::T
+BB:::::B     B:::::B                             d:::::d  G:::::GGGGGGGG::::GPP:::::P     P:::::PT:::::TT:::::::TT:::::T
+  B::::B     B:::::B  aaaaaaaaaaaaa      ddddddddd:::::d G:::::G       GGGGGG  P::::P     P:::::PTTTTTT  T:::::T  TTTTTT
+  B::::B     B:::::B  a::::::::::::a   dd::::::::::::::dG:::::G                P::::P     P:::::P        T:::::T        
+  B::::BBBBBB:::::B   aaaaaaaaa:::::a d::::::::::::::::dG:::::G                P::::PPPPPP:::::P         T:::::T        
+  B:::::::::::::BB             a::::ad:::::::ddddd:::::dG:::::G    GGGGGGGGGG  P:::::::::::::PP          T:::::T        
+  B::::BBBBBB:::::B     aaaaaaa:::::ad::::::d    d:::::dG:::::G    G::::::::G  P::::PPPPPPPPP            T:::::T        
+  B::::B     B:::::B  aa::::::::::::ad:::::d     d:::::dG:::::G    GGGGG::::G  P::::P                    T:::::T        
+  B::::B     B:::::B a::::aaaa::::::ad:::::d     d:::::dG:::::G        G::::G  P::::P                    T:::::T        
+  B::::B     B:::::Ba::::a    a:::::ad:::::d     d:::::d G:::::G       G::::G  P::::P                    T:::::T        
+BB:::::BBBBBB::::::Ba::::a    a:::::ad::::::ddddd::::::dd G:::::GGGGGGGG::::GPP::::::PP                TT:::::::TT      
+B:::::::::::::::::B a:::::aaaa::::::a d:::::::::::::::::d  GG:::::::::::::::GP::::::::P                T:::::::::T      
+B::::::::::::::::B   a::::::::::aa:::a d:::::::::ddd::::d    GGG::::::GGG:::GP::::::::P                T:::::::::T      
+BBBBBBBBBBBBBBBBB     aaaaaaaaaa  aaaa  ddddddddd   ddddd       GGGGGG   GGGGPPPPPPPPPP                TTTTTTTTTTT 
+       
+												by Youssef Elsheikh`
+	fmt.Println(asciiArt)
+	return nil 
+}
 
 func subenum() error {
 	fmt.Println("##################### Subdomain Enumeration Starts : #####################")
@@ -952,7 +977,9 @@ func updateTools() {
 	}
 }
 
+
 func main() {
+	executeWithNotification(Logo)
 	executeWithNotification(subenum)
 	executeWithNotification(filtered)
 	executeWithNotification(spliter)
