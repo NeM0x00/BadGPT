@@ -88,6 +88,13 @@ go build -o output_folder/badgpt
 - [ ] Work on result (Json&PDF)
 - [ ] Add unit tests for API endpoints
 
-## Support me 
-buymeacoffee.com/nemoxoo
+<h1 align="center">
+  <img src="https://i.imgur.com/ZEGGucH.png" alt="arsenal" width="700" >
+  <br>
+</h1>
+
+
+<h3 align="left">Support:</h3>  
+<p><a href="https://www.buymeacoffee.com/nemoxoo"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="Micro0x00" /></a></p><br><br>  
+
 
