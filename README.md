@@ -108,6 +108,8 @@ go build -o output_folder/badgpt
 We welcome contributions! Feel free to fork the repository, submit a pull request, or report issues.
 
 <h3 align="left">Support:</h3>  
-<p><a href="https://www.buymeacoffee.com/nemoxoo"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="Micro0x00" /></a></p><br><br>  
+only for Egyptian here is instapay  "nem0x00@instapay"
+<p><a href="https://ipn.eg/S/nem0x00/instapay/1PjuHv"> <img align="left" src="https://traidmod.net/wp-content/uploads/2024/06/InstaPay-Logo-240x240.webp" height="140" width="150" alt="NeM0x00" /></a></p><br><br>  
+<p><a href="https://www.buymeacoffee.com/nemoxoo"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="NeM0x00" /></a></p><br><br>  
 
 
