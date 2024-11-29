@@ -11,6 +11,7 @@ BadGPT is a powerful and versatile framework designed to streamline the bug boun
 - **Output Management:** Categorized outputs for targeted analysis.  
 
 ---
+
 ```
 BBBBBBBBBBBBBBBBB                                d::::::d       GGGGGGGGGGGGGPPPPPPPPPPPPPPPPP   TTTTTTTTTTTTTTTTTTTTTTT
 B::::::::::::::::B                               d::::::d    GGG::::::::::::GP::::::::::::::::P  T:::::::::::::::::::::T
@@ -86,3 +87,7 @@ go build -o output_folder/badgpt
 - [ ] Optimize database querie
 - [ ] Work on result (Json&PDF)
 - [ ] Add unit tests for API endpoints
+
+## Support me 
+buymeacoffee.com/nemoxoo
+
