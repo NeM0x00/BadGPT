@@ -1,4 +1,4 @@
-package main
+dpackage main
 
 import (
 	"bufio"
@@ -370,7 +370,7 @@ func extractUniqueIPs() error {
 }
 
 func notification(success bool, errorMsg string) {
-	discordWebhookURL := "https://discord.com/api/webhooks/1303587381340934265/AgNSPYOFOX2qDT5A6aW_ZDoH23ixx6iy_62rDdJpIcjH-hpnxih54FOv4eYi_VuNJWcx"
+	discordWebhookURL := "YOUR_DISCORD_WEBHOOK_URL"
 
 	var message string
 	if success {
