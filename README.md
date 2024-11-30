@@ -65,6 +65,8 @@ Nuclei # (pending implementation)
 Clone the repository:
 
 ```
+sudo apt update
+sudo apt install libpcap-dev
 git clone https://github.com/NeM0x00/BadGPT.git
 cd BadGPT
 ```
