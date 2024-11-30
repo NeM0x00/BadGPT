@@ -7,13 +7,13 @@
 ## ✨ Features  
 
 ### 1. Reconnaissance
-- Subdomain enumeration with **Subfinder**.
-- Endpoint discovery using **gau** (Get All URLs) and **Katana**.
-- Comprehensive JavaScript file analysis via **getJS**.
+- Subdomain enumeration.
+- Endpoint discovery (Get All URLs).
+- Comprehensive JavaScript file analysis.
 
 ### 2. Scanning
-- IP and port scanning with **Naabu**.
-- HTTP endpoint testing and interaction with **httpx**.
+- IP and port scanning.
+- HTTP endpoint testing and interaction.
 
 ### 3. Data Extraction
 - Detect secrets, credentials, and CVEs from the collected data.
