@@ -1,4 +1,4 @@
-dpackage main
+package main
 
 import (
 	"bufio"
