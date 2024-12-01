@@ -1,4 +1,6 @@
-# BadGPT  
+# BadGPT 
+![1c5289f0-1ab1-44f7-a837-619f9a311352](https://github.com/user-attachments/assets/f7d23767-f5bc-4ec8-8095-d586b040bb09)
+
 
 **BadGPT** is a robust framework designed to simplify and optimize the bug bounty process. Equipped with a suite of tools for reconnaissance, scanning, and exploitation, BadGPT helps researchers efficiently identify and exploit vulnerabilities. Whether you're hunting subdomains, analyzing JavaScript files, detecting secrets, or testing endpoints, **BadGPT** serves as your all-in-one solution for streamlined penetration testing.
 
